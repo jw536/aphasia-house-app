@@ -1,7 +1,7 @@
 /* Service worker: caches the app shell so My House works fully offline
    after the first visit. Bump CACHE_NAME when files change. */
 
-const CACHE_NAME = "my-house-v4";
+const CACHE_NAME = "my-house-v5";
 
 const ASSETS = [
   "./",

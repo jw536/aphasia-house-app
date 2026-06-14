@@ -154,16 +154,21 @@ async function showHome() {
     children.push(grid);
   }
 
-  if (deferredInstallPrompt) {
+  const alreadyInstalled = window.matchMedia("(display-mode: standalone)").matches;
+  if (!alreadyInstalled) {
     children.push(
       el("div", { class: "install-banner" },
         el("button", {
           class: "btn btn-primary btn-wide",
           onclick: async () => {
-            deferredInstallPrompt.prompt();
-            await deferredInstallPrompt.userChoice;
-            deferredInstallPrompt = null;
-            showHome();
+            if (deferredInstallPrompt) {
+              deferredInstallPrompt.prompt();
+              await deferredInstallPrompt.userChoice;
+              deferredInstallPrompt = null;
+              showHome();
+            } else {
+              showInstallHelp();
+            }
           },
         }, "Install app on this device")
       )
@@ -515,6 +520,19 @@ function showEntryForm({ heading, nameLabel, existing, onCancel, onSave }) {
     ),
   );
   if (!existing) nameInput.focus();
+}
+
+function showInstallHelp() {
+  overlayRoot.replaceChildren(
+    el("div", { class: "overlay" },
+      el("div", { class: "dialog" },
+        el("p", {}, "To install, open Chrome's address bar, look for a small install icon on the right side, and tap it. If you don't see it, close Chrome fully, reopen it, and come back to this page."),
+        el("div", { class: "form-buttons" },
+          el("button", { class: "btn btn-primary", onclick: () => overlayRoot.replaceChildren() }, "OK"),
+        ),
+      )
+    )
+  );
 }
 
 /* ============================================================
