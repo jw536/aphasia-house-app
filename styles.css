@@ -205,6 +205,13 @@ img { display: block; }
   margin-top: 24px;
 }
 
+/* ---------- Install banner (home screen, shown until app is installed) ---------- */
+
+.install-banner {
+  margin-top: 32px;
+  text-align: center;
+}
+
 /* ---------- Carer setup entry (small, bottom of home) ---------- */
 
 .setup-entry {

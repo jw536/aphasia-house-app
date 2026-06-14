@@ -13,6 +13,16 @@ const overlayRoot = document.getElementById("overlay-root");
 /* Whether the carer has entered the PIN this session */
 let setupUnlocked = false;
 
+/* Captured install prompt — set when Chrome is ready to install the PWA */
+let deferredInstallPrompt = null;
+window.addEventListener("beforeinstallprompt", e => {
+  e.preventDefault();
+  deferredInstallPrompt = e;
+});
+window.addEventListener("appinstalled", () => {
+  deferredInstallPrompt = null;
+});
+
 /* ---------- tiny DOM helper ---------- */
 
 function el(tag, attrs = {}, ...children) {
@@ -141,6 +151,22 @@ async function showHome() {
       "No rooms yet.", el("br"), "A carer can add rooms in Carer Setup below."));
   } else {
     children.push(grid);
+  }
+
+  if (deferredInstallPrompt) {
+    children.push(
+      el("div", { class: "install-banner" },
+        el("button", {
+          class: "btn btn-primary btn-wide",
+          onclick: async () => {
+            deferredInstallPrompt.prompt();
+            await deferredInstallPrompt.userChoice;
+            deferredInstallPrompt = null;
+            showHome();
+          },
+        }, "Install app on this device")
+      )
+    );
   }
 
   children.push(
