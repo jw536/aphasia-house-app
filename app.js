@@ -18,6 +18,7 @@ let deferredInstallPrompt = null;
 window.addEventListener("beforeinstallprompt", e => {
   e.preventDefault();
   deferredInstallPrompt = e;
+  showHome();
 });
 window.addEventListener("appinstalled", () => {
   deferredInstallPrompt = null;
