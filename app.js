@@ -80,12 +80,12 @@ function playAudio(name, audioBlob) {
 
 // Edit the constants below to update the text shown on the home screen.
 const BANNER_TITLE = "My House — a free picture board for people with aphasia";
-const BANNER_ABOUT = "This app was created [add your personal story here]. " +
+const BANNER_ABOUT = "I created this app for my mum. " +
   "It is completely free to use and always will be. " +
-  "It is built by volunteers — if it has been helpful to you, you can support the project on Patreon.";
-const BANNER_PATREON = "https://www.patreon.com/YOUR_PAGE";
-const BANNER_GITHUB  = "https://github.com/YOUR_REPO/issues";
-const BANNER_VOICE   = "Carers can upload a personalised voice recording for each item in the home. " +
+  "It is built by volunteers — if it has been helpful to you, it would be lovely if you can support the project on Patreon.";
+const BANNER_PATREON = "https://www.patreon.com/jw536";
+const BANNER_GITHUB  = "https://github.com/jw536/issues";
+const BANNER_VOICE   = "Carers can upload a personalised images and voice recordings for each item in the home. " +
   "If no recording has been added, the app reads the word aloud using the device's built-in text-to-speech.";
 
 function makeBanner() {
