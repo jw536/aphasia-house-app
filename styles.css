@@ -205,11 +205,69 @@ img { display: block; }
   margin-top: 24px;
 }
 
-/* ---------- Install banner (home screen, shown until app is installed) ---------- */
+/* ---------- Info banner (collapsible, top of home) ---------- */
 
-.install-banner {
-  margin-top: 32px;
-  text-align: center;
+.info-banner {
+  background: #eef4ff;
+  border: 2px solid #c7d9f8;
+  border-radius: var(--radius);
+  padding: 18px 52px 18px 20px; /* right padding leaves room for close button */
+  margin-bottom: 24px;
+  font-size: 0.88rem;
+  line-height: 1.55;
+  color: var(--muted);
+  position: relative;
+}
+
+.info-banner--hidden { display: none; }
+
+.info-banner-title {
+  display: block;
+  font-size: 0.95rem;
+  font-weight: 800;
+  color: var(--text);
+  margin-bottom: 6px;
+}
+
+.info-banner-inner p { margin: 6px 0 0; }
+
+.info-banner a {
+  color: var(--primary);
+  text-decoration: underline;
+}
+
+.info-banner-close {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  font-size: 0.8rem;
+  color: var(--muted);
+  padding: 6px 10px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: #fff;
+  white-space: nowrap;
+}
+
+/* ---------- Audio picker (inside add/edit item form) ---------- */
+
+.audio-picker {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.audio-picker > label:first-child {
+  font-size: 1.15rem;
+  font-weight: 800;
+}
+
+.audio-picker audio { width: 100%; }
+
+.audio-hint {
+  font-size: 0.9rem;
+  color: var(--muted);
+  margin: 0;
 }
 
 /* ---------- Carer setup entry (small, bottom of home) ---------- */

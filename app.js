@@ -13,17 +13,6 @@ const overlayRoot = document.getElementById("overlay-root");
 /* Whether the carer has entered the PIN this session */
 let setupUnlocked = false;
 
-/* Captured install prompt — set when Chrome is ready to install the PWA */
-let deferredInstallPrompt = null;
-window.addEventListener("beforeinstallprompt", e => {
-  e.preventDefault();
-  deferredInstallPrompt = e;
-  showHome();
-});
-window.addEventListener("appinstalled", () => {
-  deferredInstallPrompt = null;
-});
-
 /* ---------- tiny DOM helper ---------- */
 
 function el(tag, attrs = {}, ...children) {
@@ -72,6 +61,60 @@ function speak(text) {
     u.rate = 0.85; // slightly slower than default — clearer for the listener
     speechSynthesis.speak(u);
   } catch (e) { /* speech is a bonus, never break the app over it */ }
+}
+
+/* ---------- custom audio playback (falls back to TTS if no recording) ---------- */
+
+function playAudio(name, audioBlob) {
+  if (audioBlob) {
+    const url = URL.createObjectURL(audioBlob);
+    const audio = new Audio(url);
+    audio.addEventListener("ended", () => URL.revokeObjectURL(url));
+    audio.play().catch(() => { URL.revokeObjectURL(url); speak(name); });
+  } else {
+    speak(name);
+  }
+}
+
+/* ---------- collapsible info banner ---------- */
+
+// Edit the constants below to update the text shown on the home screen.
+const BANNER_TITLE = "My House — a free picture board for people with aphasia";
+const BANNER_ABOUT = "This app was created [add your personal story here]. " +
+  "It is completely free to use and always will be. " +
+  "It is built by volunteers — if it has been helpful to you, you can support the project on Patreon.";
+const BANNER_PATREON = "https://www.patreon.com/YOUR_PAGE";
+const BANNER_GITHUB  = "https://github.com/YOUR_REPO/issues";
+const BANNER_VOICE   = "Carers can upload a personalised voice recording for each item in the home. " +
+  "If no recording has been added, the app reads the word aloud using the device's built-in text-to-speech.";
+
+function makeBanner() {
+  const banner = el("div", { class: "info-banner" },
+    el("div", { class: "info-banner-inner" },
+      el("strong", { class: "info-banner-title" }, BANNER_TITLE),
+      el("p", {}, BANNER_ABOUT),
+      el("p", {},
+        "To suggest a feature or report a problem, please open an issue on our ",
+        el("a", { href: BANNER_GITHUB, target: "_blank", rel: "noopener noreferrer" }, "GitHub page"),
+        ". To support us financially: ",
+        el("a", { href: BANNER_PATREON, target: "_blank", rel: "noopener noreferrer" }, "Patreon"),
+        ".",
+      ),
+      el("p", {}, BANNER_VOICE),
+    ),
+    el("button", {
+      class: "info-banner-close",
+      "aria-label": "Close info panel",
+      onclick: () => {
+        banner.classList.add("info-banner--hidden");
+        localStorage.setItem("banner-hidden", "1");
+      },
+    }, "✕ Close"),
+  );
+  if (localStorage.getItem("banner-hidden") === "1") {
+    banner.classList.add("info-banner--hidden");
+  }
+  return banner;
 }
 
 /* ---------- photo handling ---------- */
@@ -145,6 +188,7 @@ async function showHome() {
 
   const children = [
     el("div", { class: "topbar" }, el("h1", {}, "My House")),
+    makeBanner(),
   ];
 
   if (rooms.length === 0) {
@@ -152,27 +196,6 @@ async function showHome() {
       "No rooms yet.", el("br"), "A carer can add rooms in Carer Setup below."));
   } else {
     children.push(grid);
-  }
-
-  const alreadyInstalled = window.matchMedia("(display-mode: standalone)").matches;
-  if (!alreadyInstalled) {
-    children.push(
-      el("div", { class: "install-banner" },
-        el("button", {
-          class: "btn btn-primary btn-wide",
-          onclick: async () => {
-            if (deferredInstallPrompt) {
-              deferredInstallPrompt.prompt();
-              await deferredInstallPrompt.userChoice;
-              deferredInstallPrompt = null;
-              showHome();
-            } else {
-              showInstallHelp();
-            }
-          },
-        }, "Install app on this device")
-      )
-    );
   }
 
   children.push(
@@ -194,7 +217,7 @@ async function showRoom(roomId) {
       el("button", {
           class: "card",
           "aria-label": item.name,
-          onclick: () => { speak(item.name); showItem(room, item); },
+          onclick: () => { playAudio(item.name, item.audio); showItem(room, item); },
         },
         el("img", { src: photoUrl(item.photo), alt: "" }),
         el("span", { class: "card-label" }, item.name),
@@ -222,10 +245,10 @@ function showItem(room, item) {
         el("span", { class: "arrow", "aria-hidden": "true" }, "◀"), room.name),
     ),
     el("div", { class: "bigview" },
-      el("button", { class: "bigphoto", "aria-label": "Say " + item.name, onclick: () => speak(item.name) },
+      el("button", { class: "bigphoto", "aria-label": "Say " + item.name, onclick: () => playAudio(item.name, item.audio) },
         el("img", { src: photoUrl(item.photo), alt: item.name })),
       el("div", { class: "bigword" }, item.name),
-      el("button", { class: "btn-say", onclick: () => speak(item.name) },
+      el("button", { class: "btn-say", onclick: () => playAudio(item.name, item.audio) },
         el("span", { "aria-hidden": "true" }, "🔊"), "Say it"),
     ),
   );
@@ -437,24 +460,27 @@ function showItemForm(room, existing) {
     heading: existing ? "Edit item" : "Add an item to " + room.name,
     nameLabel: "Item name (e.g. Kettle)",
     existing,
+    hasAudio: true,
     onCancel: () => showEditRoom(room.id),
-    onSave: async (name, photoBlob) => {
+    onSave: async (name, photoBlob, audioBlob) => {
       if (existing) {
         existing.name = name;
         if (photoBlob) existing.photo = photoBlob;
+        if (audioBlob) existing.audio = audioBlob;
         await DB.putItem(existing);
       } else {
         const items = await DB.getItems(room.id);
         const maxOrder = items.reduce((m, it) => Math.max(m, it.order || 0), 0);
-        await DB.putItem({ id: DB.newId(), roomId: room.id, name, photo: photoBlob, order: maxOrder + 1 });
+        await DB.putItem({ id: DB.newId(), roomId: room.id, name, photo: photoBlob, audio: audioBlob || null, order: maxOrder + 1 });
       }
       showEditRoom(room.id);
     },
   });
 }
 
-function showEntryForm({ heading, nameLabel, existing, onCancel, onSave }) {
-  let photoBlob = null; // newly chosen photo, if any
+function showEntryForm({ heading, nameLabel, existing, onCancel, onSave, hasAudio = false }) {
+  let photoBlob = null;
+  let audioBlob = null;
 
   const nameInput = el("input", {
     type: "text",
@@ -486,13 +512,43 @@ function showEntryForm({ heading, nameLabel, existing, onCancel, onSave }) {
     }
   });
 
+  let audioPicker = null;
+  if (hasAudio) {
+    const existingAudioUrl = existing && existing.audio
+      ? URL.createObjectURL(existing.audio)
+      : null;
+    const audioPreview = el("audio", {
+      controls: "",
+      src: existingAudioUrl || "",
+      style: existingAudioUrl ? "" : "display:none",
+    });
+    const audioInput = el("input", { type: "file", accept: "audio/*", id: "entry-audio" });
+    audioInput.addEventListener("change", () => {
+      const file = audioInput.files[0];
+      if (!file) return;
+      audioBlob = file;
+      if (audioPreview.src) URL.revokeObjectURL(audioPreview.src);
+      audioPreview.src = URL.createObjectURL(file);
+      audioPreview.style.display = "";
+    });
+    audioPicker = el("div", { class: "audio-picker" },
+      el("label", {}, "Voice recording (optional)"),
+      audioPreview,
+      audioInput,
+      el("label", { for: "entry-audio", class: "btn btn-plain btn-wide", role: "button", tabindex: "0" },
+        "🎤 " + (existing && existing.audio ? "Replace recording" : "Upload a recording")),
+      el("p", { class: "audio-hint" },
+        "If no recording is added, the device's text-to-speech reads the name aloud."),
+    );
+  }
+
   const saveBtn = el("button", { class: "btn btn-green", onclick: async () => {
     const name = nameInput.value.trim();
     if (!name) { errorMsg.textContent = "Please type a name."; nameInput.focus(); return; }
     if (!existing && !photoBlob) { errorMsg.textContent = "Please choose a photo."; return; }
     saveBtn.disabled = true;
     try {
-      await onSave(name, photoBlob);
+      await onSave(name, photoBlob, audioBlob);
     } catch (e) {
       saveBtn.disabled = false;
       errorMsg.textContent = "Saving failed — the device may be out of storage space.";
@@ -512,6 +568,7 @@ function showEntryForm({ heading, nameLabel, existing, onCancel, onSave }) {
         el("label", { for: "entry-photo", class: "btn btn-primary btn-wide", role: "button", tabindex: "0" },
           existing ? "📷 Change photo" : "📷 Take or choose a photo"),
       ),
+      audioPicker,
       errorMsg,
       el("div", { class: "form-buttons" },
         el("button", { class: "btn btn-plain", onclick: onCancel }, "Cancel"),
@@ -520,19 +577,6 @@ function showEntryForm({ heading, nameLabel, existing, onCancel, onSave }) {
     ),
   );
   if (!existing) nameInput.focus();
-}
-
-function showInstallHelp() {
-  overlayRoot.replaceChildren(
-    el("div", { class: "overlay" },
-      el("div", { class: "dialog" },
-        el("p", {}, "To install, open Chrome's address bar, look for a small install icon on the right side, and tap it. If you don't see it, close Chrome fully, reopen it, and come back to this page."),
-        el("div", { class: "form-buttons" },
-          el("button", { class: "btn btn-primary", onclick: () => overlayRoot.replaceChildren() }, "OK"),
-        ),
-      )
-    )
-  );
 }
 
 /* ============================================================
