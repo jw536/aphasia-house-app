@@ -107,11 +107,11 @@ function makeBanner() {
       "aria-label": "Close info panel",
       onclick: () => {
         banner.classList.add("info-banner--hidden");
-        localStorage.setItem("banner-hidden", "1");
+        sessionStorage.setItem("banner-hidden", "1");
       },
     }, "✕ Close"),
   );
-  if (localStorage.getItem("banner-hidden") === "1") {
+  if (sessionStorage.getItem("banner-hidden") === "1") {
     banner.classList.add("info-banner--hidden");
   }
   return banner;
