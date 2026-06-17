@@ -86,7 +86,7 @@ const BANNER_ABOUT = "I created this app for my mum. " +
   "It is built and maintained by me - if it has been helpful to you, it would be lovely if you can support the project on buymeacoffee.";
 const BANNER_BUYMECOFFEE = "https://buymeacoffee.com/jw536";
 const BANNER_GITHUB  = "https://github.com/jw536/issues";
-const BANNER_VOICE   = "Carers can upload a personalised images and voice recordings for each room and item in the home. " +
+const BANNER_VOICE   = "Carers can upload personalised images and voice recordings for each room and item in the home. " +
    "Click Carer setup to add a pin and add rooms of your house and item from those rooms." +
   "If no recording has been added, the app reads the word aloud using the device's built-in text-to-speech." +
    "All images and recordings are stored on your device and not sent anywhere else.";
