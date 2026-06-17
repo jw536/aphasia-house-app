@@ -82,8 +82,8 @@ function playAudio(name, audioBlob) {
 const BANNER_TITLE = "My House — a free picture board for people with aphasia";
 const BANNER_ABOUT = "I created this app for my mum. " +
   "It is completely free to use and always will be. " +
-  "It is built by volunteers — if it has been helpful to you, it would be lovely if you can support the project on Patreon.";
-const BANNER_PATREON = "https://www.patreon.com/jw536";
+  "It is built by volunteers — if it has been helpful to you, it would be lovely if you can support the project on buymeacoffee.";
+const BANNER_BUYMECOFFEE = "https://buymeacoffee.com/jw536";
 const BANNER_GITHUB  = "https://github.com/jw536/issues";
 const BANNER_VOICE   = "Carers can upload a personalised images and voice recordings for each item in the home. " +
   "If no recording has been added, the app reads the word aloud using the device's built-in text-to-speech.";
@@ -97,7 +97,7 @@ function makeBanner() {
         "To suggest a feature or report a problem, please open an issue on our ",
         el("a", { href: BANNER_GITHUB, target: "_blank", rel: "noopener noreferrer" }, "GitHub page"),
         ". To support us financially: ",
-        el("a", { href: BANNER_PATREON, target: "_blank", rel: "noopener noreferrer" }, "Patreon"),
+        el("a", { href: BANNER_BUYMECOFFEE, target: "_blank", rel: "noopener noreferrer" }, "buymeacoffee"),
         ".",
       ),
       el("p", {}, BANNER_VOICE),
