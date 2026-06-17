@@ -80,8 +80,8 @@ function playAudio(name, audioBlob) {
 
 // Edit the constants below to update the text shown on the home screen.
 const BANNER_TITLE = "My House Aphasia app - a free home picture and sound board for people with aphasia";
-const BANNER_ABOUT = "I created this app for my mum. " +
-   "To help her relearn speech and express her needs in the house" +
+const BANNER_ABOUT = "I created this app for my mum " +
+   "to help her relearn speech and express her needs in the house" +
   "It is completely free to use and always will be. " +
   "It is built and maintained by me - if it has been helpful to you, it would be lovely if you can support the project on buymeacoffee.";
 const BANNER_BUYMECOFFEE = "https://buymeacoffee.com/jw536";
