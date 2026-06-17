@@ -81,14 +81,14 @@ function playAudio(name, audioBlob) {
 // Edit the constants below to update the text shown on the home screen.
 const BANNER_TITLE = "My House Aphasia app - a free home picture and sound board for people with aphasia";
 const BANNER_ABOUT = "I created this app for my mum " +
-   "to help her relearn speech and express her needs in the house" +
+   "to help her relearn speech and express her needs in the house. " +
   "It is completely free to use and always will be. " +
   "It is built and maintained by me - if it has been helpful to you, it would be lovely if you can support the project on buymeacoffee.";
 const BANNER_BUYMECOFFEE = "https://buymeacoffee.com/jw536";
 const BANNER_GITHUB  = "https://github.com/jw536/issues";
 const BANNER_VOICE   = "Carers can upload personalised images and voice recordings for each room and item in the home. " +
-   "Click Carer setup to add a pin and add rooms of your house and item from those rooms." +
-  "If no recording has been added, the app reads the word aloud using the device's built-in text-to-speech." +
+   "Click Carer setup to add a pin and add rooms of your house and item from those rooms. " +
+  "If no recording has been added, the app reads the word aloud using the device's built-in text-to-speech. " +
    "All images and recordings are stored on your device and not sent anywhere else.";
 
 function makeBanner() {
